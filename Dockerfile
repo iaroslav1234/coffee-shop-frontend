@@ -19,8 +19,9 @@ ENV CI=false
 # Build the app
 RUN npm run build
 
-# Expose port
-EXPOSE 3000
+# Create start script
+RUN echo '#!/bin/sh\nserve -s build --listen ${PORT:-3000}' > start.sh && \
+    chmod +x start.sh
 
 # Start the app
-CMD ["serve", "-s", "build", "-l", "3000"]
+CMD ["./start.sh"]
