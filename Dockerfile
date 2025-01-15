@@ -1,12 +1,13 @@
-FROM node:18-alpine as builder
+FROM node:18-alpine
 
 WORKDIR /app
 
 # Copy package files first for better caching
 COPY frontend/package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies and serve
+RUN npm install && \
+    npm install -g serve
 
 # Copy the rest of the code
 COPY frontend/ ./
@@ -18,17 +19,8 @@ ENV CI=false
 # Build the app
 RUN npm run build
 
-# Production stage
-FROM nginx:alpine
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy built files from builder stage
-COPY --from=builder /app/build /usr/share/nginx/html
-
 # Expose port
-EXPOSE 80
+EXPOSE 3000
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start the app
+CMD ["serve", "-s", "build", "-l", "3000"]
