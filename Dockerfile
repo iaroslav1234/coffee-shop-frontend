@@ -3,13 +3,13 @@ FROM node:18-alpine as builder
 WORKDIR /app
 
 # Copy package files first for better caching
-COPY package*.json ./
+COPY frontend/package*.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy the rest of the code
-COPY . .
+COPY frontend/ ./
 
 # Set production environment
 ENV NODE_ENV=production
