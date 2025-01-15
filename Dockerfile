@@ -19,9 +19,5 @@ ENV CI=false
 # Build the app
 RUN npm run build
 
-# Create start script
-RUN echo '#!/bin/sh\nserve -s build --listen ${PORT:-3000}' > start.sh && \
-    chmod +x start.sh
-
-# Start the app
-CMD ["./start.sh"]
+# Start the app using shell form to properly expand environment variables
+CMD serve -s build --listen ${PORT:-3000}
