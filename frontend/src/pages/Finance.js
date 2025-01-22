@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import config from '../config';
 import {
   Box,
   Card,
@@ -52,7 +53,7 @@ const Finance = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/finance/summary`, {
+      const response = await axios.get(`${config.apiUrl}/finance/summary`, {
         params: {
           start_date: period === 'daily' ? selectedDate.toISOString() : null,
           end_date: selectedDate.toISOString()
