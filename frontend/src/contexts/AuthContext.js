@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import config from '../config';
 
 const AuthContext = createContext(null);
 
@@ -19,19 +20,21 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, {
+      const formData = new URLSearchParams();
+      formData.append('username', email);
+      formData.append('password', password);
+
+      const response = await fetch(`${config.apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Invalid credentials');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Invalid credentials');
       }
 
       const data = await response.json();
@@ -54,7 +57,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
+      const response = await fetch(`${config.apiUrl}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -71,6 +74,7 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       return data;
     } catch (err) {
+      console.error('Registration error:', err);
       setError(err.message || 'An error occurred during registration');
       throw err;
     }

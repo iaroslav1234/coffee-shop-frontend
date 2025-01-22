@@ -26,6 +26,7 @@ import {
   Logout as LogoutIcon,
   Person as PersonIcon,
 } from '@mui/icons-material';
+import { useAuth } from '../contexts/AuthContext';
 
 const drawerWidth = 240;
 
@@ -42,7 +43,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [anchorEl, setAnchorEl] = useState(null);
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const { user, logout } = useAuth();
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -53,10 +54,14 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    logout();
+    handleMenuClose();
     navigate('/login');
   };
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <>
@@ -99,7 +104,7 @@ const Navbar = () => {
             >
               <MenuItem disabled>
                 <Typography variant="body2" color="textSecondary">
-                  {user?.email || 'User'}
+                  {user?.email}
                 </Typography>
               </MenuItem>
               <Divider />
@@ -113,7 +118,6 @@ const Navbar = () => {
           </Box>
         </Toolbar>
       </AppBar>
-      
       <Drawer
         variant="permanent"
         sx={{

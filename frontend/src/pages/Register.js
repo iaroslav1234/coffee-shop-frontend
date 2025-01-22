@@ -54,18 +54,20 @@ const Register = () => {
 
     setLoading(true);
     try {
-      await register({
+      const result = await register({
         name: formData.name,
         email: formData.email,
         password: formData.password,
       });
+      console.log('Registration result:', result);
       navigate('/login', { 
         state: { 
           message: 'Registration successful! Please log in.' 
         } 
       });
     } catch (err) {
-      setFormError(err.response?.data?.message || 'Failed to register');
+      console.error('Registration error in component:', err);
+      setFormError(err.message || 'Failed to register. Please try again.');
     } finally {
       setLoading(false);
     }
