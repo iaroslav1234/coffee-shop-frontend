@@ -51,16 +51,31 @@ const Finance = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`http://localhost:5001/api/finance/profit`, {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/finance/summary`, {
         params: {
-          period,
-          date: selectedDate.toISOString()
+          start_date: period === 'daily' ? selectedDate.toISOString() : null,
+          end_date: selectedDate.toISOString()
+        },
+        headers: {
+          Authorization: `Bearer ${token}`
         }
       });
-      setProfitData(response.data);
+      setProfitData(response.data || {
+        total_revenue: 0,
+        total_cost: 0,
+        total_profit: 0,
+        data: []
+      });
     } catch (err) {
-      setError('Error fetching financial data');
       console.error('Error:', err);
+      setError('Error fetching financial data');
+      setProfitData({
+        total_revenue: 0,
+        total_cost: 0,
+        total_profit: 0,
+        data: []
+      });
     } finally {
       setLoading(false);
     }

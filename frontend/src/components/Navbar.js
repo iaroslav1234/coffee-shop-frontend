@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
@@ -10,6 +10,11 @@ import {
   ListItemIcon,
   ListItemText,
   Box,
+  IconButton,
+  Menu,
+  MenuItem,
+  Avatar,
+  Divider,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -18,6 +23,8 @@ import {
   AccountBalance as FinanceIcon,
   Update as StockUpdateIcon,
   Restaurant as MenuIcon,
+  Logout as LogoutIcon,
+  Person as PersonIcon,
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -34,25 +41,85 @@ const menuItems = [
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  const handleProfileMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   return (
     <>
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <Toolbar>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography variant="h6" noWrap component="div">
             Coffee Shop Manager
           </Typography>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleProfileMenuOpen}
+              color="inherit"
+            >
+              {user?.picture ? (
+                <Avatar src={user.picture} alt={user.name} />
+              ) : (
+                <PersonIcon />
+              )}
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+            >
+              <MenuItem disabled>
+                <Typography variant="body2" color="textSecondary">
+                  {user?.email || 'User'}
+                </Typography>
+              </MenuItem>
+              <Divider />
+              <MenuItem onClick={handleLogout}>
+                <ListItemIcon>
+                  <LogoutIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Logout</ListItemText>
+              </MenuItem>
+            </Menu>
+          </Box>
         </Toolbar>
       </AppBar>
+      
       <Drawer
         variant="permanent"
         sx={{
           width: drawerWidth,
           flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-          },
+          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
         }}
       >
         <Toolbar />

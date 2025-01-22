@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
 
 const AuthContext = createContext(null);
 
@@ -10,93 +9,69 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check if user is logged in on mount
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      checkAuth();
-    } else {
-      setLoading(false);
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    if (token && storedUser) {
+      setUser(JSON.parse(storedUser));
     }
+    setLoading(false);
   }, []);
 
-  const checkAuth = async () => {
+  const login = async (email, password) => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
-      setUser(response.data);
-      setError(null);
-    } catch (err) {
-      logout();
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const login = async (email, password, rememberMe) => {
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/login`, {
-        email,
-        password
-      });
-      
-      const { access_token, refresh_token, user: userData } = response.data;
-      
-      localStorage.setItem('accessToken', access_token);
-      if (rememberMe) {
-        localStorage.setItem('refreshToken', refresh_token);
+      if (!response.ok) {
+        throw new Error('Invalid credentials');
       }
-      
-      setUser(userData);
+
+      const data = await response.json();
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUser(data.user);
       setError(null);
-      return userData;
+      return data.user;
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred during login');
+      setError(err.message || 'An error occurred during login');
       throw err;
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
   };
 
   const register = async (userData) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/register`, userData);
-      setError(null);
-      return response.data;
-    } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred during registration');
-      throw err;
-    }
-  };
-
-  const resetPassword = async (email) => {
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/auth/password/reset-request`, {
-        email
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
       });
-      setError(null);
-      return response.data;
-    } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred');
-      throw err;
-    }
-  };
 
-  const updatePassword = async (token, newPassword) => {
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/auth/password/reset`,
-        { new_password: newPassword },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Registration failed');
+      }
+
+      const data = await response.json();
       setError(null);
-      return response.data;
+      return data;
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred');
+      setError(err.message || 'An error occurred during registration');
       throw err;
     }
   };
@@ -110,8 +85,6 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         register,
-        resetPassword,
-        updatePassword,
       }}
     >
       {children}

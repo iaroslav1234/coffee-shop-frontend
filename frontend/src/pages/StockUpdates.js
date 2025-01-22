@@ -41,7 +41,7 @@ const StockUpdates = () => {
 
   const fetchStockUpdates = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/stock-updates');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/stock-updates`);
       setStockUpdates(response.data);
     } catch (error) {
       console.error('Error fetching stock updates:', error);
@@ -51,7 +51,7 @@ const StockUpdates = () => {
 
   const fetchIngredients = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/ingredients');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/inventory`);
       setIngredients(response.data);
     } catch (error) {
       console.error('Error fetching ingredients:', error);
@@ -94,7 +94,7 @@ const StockUpdates = () => {
         cost_per_unit: parseFloat(formData.cost_per_unit)
       };
 
-      await axios.post('http://localhost:5001/api/stock-updates', data);
+      await axios.post(`${process.env.REACT_APP_API_URL}/stock-updates`, data);
       showAlert('Stock update recorded successfully');
       handleClose();
       fetchStockUpdates();
@@ -107,7 +107,7 @@ const StockUpdates = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this stock update? This will revert the inventory changes.')) {
       try {
-        await axios.delete(`http://localhost:5001/api/stock-updates/${id}`);
+        await axios.delete(`${process.env.REACT_APP_API_URL}/stock-updates/${id}`);
         showAlert('Stock update deleted successfully');
         fetchStockUpdates();
       } catch (error) {
@@ -155,8 +155,8 @@ const StockUpdates = () => {
                 <TableCell>{new Date(update.date).toLocaleDateString()}</TableCell>
                 <TableCell>{update.ingredient_name}</TableCell>
                 <TableCell>{update.quantity} {update.unit}</TableCell>
-                <TableCell>฿{update.cost_per_unit.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                <TableCell>฿{update.total_cost.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                <TableCell>฿{(update.cost_per_unit || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                <TableCell>฿{(update.total_cost || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                 <TableCell>{update.notes}</TableCell>
                 <TableCell>
                   <IconButton onClick={() => handleDelete(update.id)} color="error">

@@ -9,10 +9,8 @@ import {
   Alert,
   CircularProgress,
   Fade,
-  Link,
-  MenuItem,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import CoffeeIcon from '@mui/icons-material/Coffee';
 
@@ -25,7 +23,6 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'staff',
   });
   const [formError, setFormError] = useState('');
 
@@ -61,7 +58,6 @@ const Register = () => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: formData.role,
       });
       navigate('/login', { 
         state: { 
@@ -179,22 +175,6 @@ const Register = () => {
               onChange={handleChange}
               sx={{ mb: 2 }}
             />
-            <TextField
-              select
-              margin="normal"
-              required
-              fullWidth
-              name="role"
-              label="Role"
-              id="role"
-              value={formData.role}
-              onChange={handleChange}
-              sx={{ mb: 2 }}
-            >
-              <MenuItem value="staff">Staff</MenuItem>
-              <MenuItem value="manager">Manager</MenuItem>
-              <MenuItem value="admin">Admin</MenuItem>
-            </TextField>
             <Button
               type="submit"
               fullWidth
@@ -217,15 +197,7 @@ const Register = () => {
               )}
             </Button>
             <Box sx={{ textAlign: 'center' }}>
-              <Link
-                href="#"
-                variant="body2"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/login');
-                }}
-                sx={{ textDecoration: 'none' }}
-              >
+              <Link to="/login" style={{ textDecoration: 'none', color: 'primary.main' }}>
                 Already have an account? Sign in
               </Link>
             </Box>
